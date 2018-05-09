@@ -25,8 +25,7 @@ app.post('/slash', (req, res) => {
     switch(command) {
         case '/stamp':
             const emojiName = text && text.replace(/:([^:]+):/, '$1');
-            postEmojiAsAttachemt(id, channelId, emojiName)
-                .catch(res.send('Please set *custom* emoji name. e.g. /stamp :shirokuma :pray:').status(200).end());
+            postEmojiAsAttachemt(id, channelId, emojiName).catch((e) =>console.log(e));
             break;
         case '/iine':
             const num = text && text.replace(/^'(\d)'/, '$1');
@@ -46,6 +45,7 @@ async function postEmojiAsAttachemt(userId, channelId, emojiName){
     const user = await findUser(userId);
     const slackClient = new WebClient(user.token);
     const emojiUrl = await getEmojiUrl(slackClient, emojiName);
+    console.log(emojiUrl);
     if (!emojiUrl) throw new Error(`${emojiName} is missing or an error has occurred.`);
     const postMsg = { 
         channel: channelId, 
@@ -59,7 +59,7 @@ async function postEmojiAsAttachemt(userId, channelId, emojiName){
     };  
     slackClient.chat.postMessage(postMsg).then((res) => {
         console.log('Message sent: ', res.ts);
-    });
+    }).catch((e) =>console.log(e));
 };
 
 async function postEmojiReaction(userId, channelId, emojiNameList){
