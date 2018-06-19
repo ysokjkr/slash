@@ -4,6 +4,7 @@ const express = require('express');
 const app = express();
 const request = require('request');
 const bodyParser = require('body-parser');
+const HttpsProxyAgent = require('https-proxy-agent');
 const { WebClient } = require('@slack/client');
 
 const iineEmojiList = require('./app/emojiList');
@@ -18,6 +19,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 const port = process.env.PORT || 4390; // local環境でngrokのhttpsを受けるport 4390;
+const proxyUrl = process.env.FIXIE_URL || 'http://12.34.56.78:9999';
 
 app.post('/slash', (req, res) => {
     const { command, text, user_id: id, channel_id: channelId, } = req.body;
@@ -43,7 +45,7 @@ app.post('/slash', (req, res) => {
 
 async function postEmojiAsAttachemt(userId, channelId, emojiName){
     const user = await findUser(userId);
-    const slackClient = new WebClient(user.token);
+    const slackClient = new WebClient(user.token, { agent: new HttpsProxyAgent(proxyUrl) });
     const emojiUrl = await getEmojiUrl(slackClient, emojiName);
     console.log(emojiUrl);
     if (!emojiUrl) throw new Error(`${emojiName} is missing or an error has occurred.`);
@@ -64,7 +66,7 @@ async function postEmojiAsAttachemt(userId, channelId, emojiName){
 
 async function postEmojiReaction(userId, channelId, emojiNameList){
     const user = await findUser(userId);
-    const slackClient = new WebClient(user.token);
+    const slackClient = new WebClient(user.token, { agent: new HttpsProxyAgent(proxyUrl) });
     const targetMsg = await getLatestPublicAction(slackClient, channelId);
     const postMsg = { 
         as_user: true,
@@ -119,13 +121,14 @@ app.get('/auth', (req, res) =>{
 });
 
 app.get('/auth/redirect', (req, res) =>{
-    var options = {
+    const options = {
         uri: 'https://slack.com/api/oauth.access?code='
             +req.query.code+
             '&client_id='+clientId+
             '&client_secret='+clientSecret+
             '&redirect_uri='+ redirectUrl,
-        method: 'GET'
+        method: 'GET',
+        proxy: pproxyUrl
     }
     request(options, (error, response, body) => {
         const { ok, user_id: id, access_token: token } = JSON.parse(body);
