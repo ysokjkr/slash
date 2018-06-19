@@ -27,7 +27,7 @@ app.post('/slash', (req, res) => {
     switch(command) {
         case '/stamp':
             const emojiName = text && text.replace(/:([^:]+):/, '$1');
-            postEmojiAsAttachemt(id, channelId, emojiName).catch(res.send('Please set *custom* emoji name. e.g. /stamp :shirokuma :pray:').status(200).end());
+            postEmojiAsAttachemt(id, channelId, emojiName).catch((e) => console.log(e));
             break;
         case '/iine':
             const num = text && text.replace(/^'(\d)'/, '$1');
