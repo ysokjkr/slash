@@ -128,7 +128,6 @@ app.get('/auth/redirect', (req, res) =>{
             '&client_secret='+clientSecret+
             '&redirect_uri='+ redirectUrl,
         method: 'GET',
-        proxy: pproxyUrl
     }
     request(options, (error, response, body) => {
         const { ok, user_id: id, access_token: token } = JSON.parse(body);
