@@ -9,11 +9,11 @@ const { WebClient } = require('@slack/client');
 const iineEmojiList = require('./app/emojiList');
 
 // DB接続
-const mongoose   = require('mongoose');
+const mongoose = require('mongoose');
 const mongo_url = process.env.MONGODB_URI;
 mongoose.connect(mongo_url);
 // モデルの宣言
-const User       = require('./app/models/user');
+const User = require('./app/models/user');
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -25,7 +25,7 @@ app.post('/slash', (req, res) => {
     switch(command) {
         case '/stamp':
             const emojiName = text && text.replace(/:([^:]+):/, '$1');
-            postEmojiAsAttachemt(id, channelId, emojiName).catch((e) =>console.log(e));
+            postEmojiAsAttachemt(id, channelId, emojiName).catch(res.send('Please set *custom* emoji name. e.g. /stamp :shirokuma :pray:').status(200).end());
             break;
         case '/iine':
             const num = text && text.replace(/^'(\d)'/, '$1');
